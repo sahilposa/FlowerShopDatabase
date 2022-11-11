@@ -1,8 +1,8 @@
 class Schema:
-
     @staticmethod
     def __create_cus(conn, cursor):
-        cursor.execute("""CREATE TABLE customer(
+        
+        cursor.execute("""CREATE TABLE IF NOT EXISTS customer(
                 customerID INTEGER PRIMARY KEY,
                 fname TEXT NOT NULL,
                 lname TEXT NOT NULL,
@@ -12,7 +12,7 @@ class Schema:
 
     @staticmethod
     def __create_emp(conn, cursor):
-        cursor.execute("""CREATE TABLE employee(
+        cursor.execute("""CREATE TABLE IF NOT EXISTS employee(
                 employeeID INTEGER PRIMARY KEY,
                 fname TEXT NOT NULL,
                 lname TEXT NOT NULL,
@@ -23,7 +23,7 @@ class Schema:
 
     @staticmethod
     def __create_prod(conn, cursor):
-        cursor.execute("""CREATE TABLE product (
+        cursor.execute("""CREATE TABLE IF NOT EXISTS product (
                 productID INTEGER PRIMARY KEY,
                 p_desc TEXT NOT NULL,
                 price REAL NOT NULL,
@@ -33,7 +33,7 @@ class Schema:
 
     @staticmethod
     def __create_orders(conn, cursor):
-        cursor.execute("""CREATE TABLE orders(
+        cursor.execute("""CREATE TABLE IF NOT EXISTS orders(
                 orderID INTEGER PRIMARY KEY,
                 customerID INTEGER,
                 employeeID INTEGER,
@@ -49,7 +49,7 @@ class Schema:
 
     @staticmethod
     def __create_purchase(conn, cursor):
-        cursor.execute("""CREATE TABLE purchase(
+        cursor.execute("""CREATE TABLE IF NOT EXISTS purchase(
                 orderID INTEGER NOT NULL,
                 productID INTEGER NOT NULL,
                 quantity INTEGER NOT NULL CHECK (quantity>0),
