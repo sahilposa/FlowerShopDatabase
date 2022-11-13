@@ -13,11 +13,21 @@ app = Flask(__name__)
 from database import Database
 
 conn = sqlite3.connect('flowershopdatabase.db', check_same_thread=False)
+conn.execute("PRAGMA foreign_keys = 1")
 cursor = conn.cursor()
 db = Database(conn,cursor)
 Schema.build(conn, cursor)
 db.add_cus('Andy','Not',9999999999)
 conn.close()
+
+
+def get_db_connection():
+    conn = sqlite3.connect('flowershopdatabase.db', check_same_thread=False)
+    conn.execute("PRAGMA foreign_keys = 1")
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 @app.route("/")
 def index():
     conn = get_db_connection()
