@@ -6,9 +6,11 @@ from schema import Schema
 from flask import Flask, render_template, request, url_for, flash, redirect
 
 app = Flask(__name__)
+from database import Database
 
 conn = sqlite3.connect('flowershopdatabase.db', check_same_thread=False)
 cursor = conn.cursor()
+db = Database(conn,cursor)
 Schema.build(conn, cursor)
 conn.close()
 
