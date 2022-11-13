@@ -135,5 +135,9 @@ class Database:
         self.cursor.execute("DELETE FROM ORDERS WHERE ORDERID = "+str(orderID))
         self.conn.commit()
     #sorted select functions
-    def sort_table(self,table,target,asc):
-        return self.conn.execute("SELECT * FROM "+table+" ORDER BY "+target+" "+asc).fetchall()
+    def sort_table(self,table,order,asc):
+        return self.conn.execute("SELECT * FROM "+table+" ORDER BY "+order+" "+asc).fetchall()
+    def filter_table(self,table,target,value):
+        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+"="+value).fetchall()
+    def sort_filter(self,table,order,asc,target,value):
+        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+"="+value+" ORDER BY "+order+" "+asc).fetchall()
