@@ -140,5 +140,6 @@ class Database:
     #Filters results
     def filter_table(self,table,target,value,op):
         return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value).fetchall()
+    #sorts and filters
     def sort_filter(self,table,order,asc,target,value,op):
         return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value+" ORDER BY "+order+" "+asc).fetchall()
