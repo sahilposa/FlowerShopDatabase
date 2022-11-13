@@ -23,7 +23,7 @@ def index():
     conn = get_db_connection()
     cursor = conn.cursor()
     db = Database(conn,cursor)
-    customers = db.sort_filter('customer','customerID','DESC','fname','\'Andy\'')
+    customers = db.sort_filter('customer','customerID','DESC','lname','\'Kincheloe\'','=')
     conn.close()
     return render_template('index.html', customers=customers)
 

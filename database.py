@@ -137,7 +137,8 @@ class Database:
     #sorted select functions
     def sort_table(self,table,order,asc):
         return self.conn.execute("SELECT * FROM "+table+" ORDER BY "+order+" "+asc).fetchall()
-    def filter_table(self,table,target,value):
-        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+"="+value).fetchall()
-    def sort_filter(self,table,order,asc,target,value):
-        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+"="+value+" ORDER BY "+order+" "+asc).fetchall()
+    #Filters results
+    def filter_table(self,table,target,value,op):
+        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value).fetchall()
+    def sort_filter(self,table,order,asc,target,value,op):
+        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value+" ORDER BY "+order+" "+asc).fetchall()
