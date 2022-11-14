@@ -1,3 +1,6 @@
+from flask import flash
+
+
 class Checks:
 
     @staticmethod
@@ -76,3 +79,13 @@ class Checks:
         if attribute+op == "" and not value:
             return True
         return False
+
+    @staticmethod
+    def sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+        if not Checks.is_filt_valid(filt_attr, op, value):
+            flash("Must fill all filter options or none.")
+            return False
+        if not Checks.is_sort_valid(sort_attr, asc):
+            flash("Must choose both sort options or neither.")
+            return False
+        return True
