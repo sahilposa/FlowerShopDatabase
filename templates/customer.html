@@ -49,12 +49,14 @@
     </div>
     <table>
         <tr>
+            <th>ID</th>
             <th>Last Name</th>
             <th>First Name</th>
             <th>Phone</th>
         </tr>
         {% for customer in customers %}
                 <tr>
+                    <td>{{ customer['customerID'] }}</td>
                     <td>{{ customer['lname'] }}</td>
                     <td>{{ customer['fname'] }}</td>
                     <td>{{ customer['phone'] }}</td>

@@ -1,4 +1,5 @@
 from checks import Checks
+import sqlite3
 
 
 class Database:
@@ -171,7 +172,7 @@ class Database:
     def sort_filter(self,table,order,asc,target,value,op):
         return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value+" ORDER BY "+order+" "+asc).fetchall()
     #handles transactions for placing orders
-    def ord_transaction(self, phone, list):
+    def ord_transaction(self, phone, employeeID, list):
         with self.conn:
             self.cursor.execute("BEGIN")
             try:
@@ -181,7 +182,7 @@ class Database:
                 else:
                     customerID = None
                 self.cursor.execute("INSERT INTO orders (customerID, employeeID, total) VALUES (?, ?, ?)",
-                                    (customerID, None, 0))
+                                    (customerID, employeeID, 0))
                 orderID = self.cursor.execute("SELECT MAX(orderID) from orders").fetchone()[0]
                 for x in range(len(list)):
                     if int(list[x]) > 0:

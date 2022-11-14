@@ -241,14 +241,16 @@ def purchase():
 def place_ord():
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor = conn.cursor()
     products = conn.execute("SELECT * FROM product")
     id = 1
     list = []
     if request.method == "POST":
         phone = request.form['phone']
+        employeeID = request.form['employeeID']
         if not phone:
             phone = None
+        if not employeeID:
+            employeeID = None
         elif cursor.execute("SELECT * FROM customer WHERE phone=?", (int(phone),)).fetchone() is None:
             flash("Phone not found")
             return render_template('placeOrder.html', products=products)
@@ -258,7 +260,7 @@ def place_ord():
             list.append(request.form[''+str(id)])
             id = id+1
         db = Database(conn, cursor)
-        db.ord_transaction(phone, list)
+        db.ord_transaction(phone,employeeID, list)
         return redirect(url_for('index'))
     return render_template('placeOrder.html', products=products)
 
