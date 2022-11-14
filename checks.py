@@ -48,3 +48,31 @@ class Checks:
         if cursor.fetchone() is None:
             return True
         return False
+
+    @staticmethod
+    def is_sort_valid(attribute, asc):
+        if (attribute == "") != (asc == ""):
+            return False
+        return True
+
+    @staticmethod
+    def is_filt_valid(attribute, op, value):
+        if (attribute == "") != (op == ""):
+            return False
+        if attribute+op == "" and value:
+            return False
+        if attribute+op != "" and not value:
+            return False
+        return True
+
+    @staticmethod
+    def is_sort_blank(attribute, asc):
+        if attribute+asc == "":
+            return True
+        return False
+
+    @staticmethod
+    def is_filt_blank(attribute, op, value):
+        if attribute+op == "" and not value:
+            return True
+        return False
