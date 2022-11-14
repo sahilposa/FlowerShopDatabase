@@ -7,7 +7,7 @@
             <div>
                 <label>Filter:</label>
                 <select name="filt_attr">
-                    <option value=""></option>
+                    <option value="" disabled selected>Select Feature</option>
                     <option value="employeeID">ID</option>
                     <option value="fname">First</option>
                     <option value="lname">Last</option>
@@ -15,18 +15,18 @@
                     <option value="salary">Salary</option>
                 </select>
                 <select name="op">
-                    <option value=""></option>
+                    <option value="" disabled selected>Select Operator</option>
                     <option value="=">=</option>
                     <option value="<"><</option>
                     <option value=">">></option>
                     <option value=">=">>=</option>
                     <option value="<="><=</option>
                 </select>
-                <input type="text" name="value">
+                <input type="text" name="value" placeholder="Value">
             </div>
             <label>Sort:</label>
             <select name="sort_attr" id="sort_attr">
-                <option value=""></option>
+                <option value="" disabled selected>Select Attribute</option>
                 <option value="employeeID">ID</option>
                 <option value="fname">First</option>
                 <option value="lname">Last</option>
@@ -34,23 +34,23 @@
                 <option value="salary">Salary</option>
             </select>
             <select name="asc" id="asc">
-                <option value=""></option>
+                <option value="" disabled selected>ASC|DESC</option>
                 <option value="ASC">Ascending</option>
                 <option value="DESC">Descending</option>
             </select>
             <button type="submit" name="sort" value="sort">Submit</button>
             <div>
                 <label>Add/Update:</label>
-                <input type="text" name="lname">
-                <input type="text" name="fname">
-                <input type="text" name="position">
-                <input type="text" name="salary">
+                <input type="text" name="lname" placeholder="Last Name">
+                <input type="text" name="fname" placeholder="First Name">
+                <input type="text" name="position" placeholder="Position">
+                <input type="text" name="salary" placeholder="Salary">
                 <button type="submit" name="add" value="add">Submit</button>
             </div>
             <div>
                 <label>Delete:</label>
-                <input type="text" name="lname2">
-                <input type="text" name="fname2">
+                <input type="text" name="lname2" placeholder="Last Name">
+                <input type="text" name="fname2" placeholder="First Name">
                 <button type="submit" name="del" value="del">Submit</button>
             </div>
         </form>
