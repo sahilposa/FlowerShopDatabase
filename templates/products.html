@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Products {% endblock %}</h1>
+    <div>
+        <form method="post">
+            <div>
+                <label>Filter:</label>
+                <select name="filt_attr">
+                    <option value=""></option>
+                    <option value="productID">ID</option>
+                    <option value="p_desc">Product</option>
+                    <option value="price">Price</option>
+                    <option value="stock">Stock</option>
+                </select>
+                <select name="op">
+                    <option value=""></option>
+                    <option value="=">=</option>
+                    <option value="<"><</option>
+                    <option value=">">></option>
+                    <option value=">=">>=</option>
+                    <option value="<="><=</option>
+                </select>
+                <input type="text" name="value">
+            </div>
+            <label>Sort:</label>
+            <select name="sort_attr" id="sort_attr">
+                    <option value=""></option>
+                    <option value="productID">ID</option>
+                    <option value="p_desc">Product</option>
+                    <option value="price">Price</option>
+                    <option value="stock">Stock</option>
+            </select>
+            <select name="asc" id="asc">
+                <option value=""></option>
+                <option value="ASC">Ascending</option>
+                <option value="DESC">Descending</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <table>
+        <tr>
+          <th>ID</th>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+        </tr>
+        {% for product in products %}
+                <tr>
+                    <td>{{ product['productID'] }}</td>
+                    <td>{{ product['p_desc'] }}</td>
+                    <td>{{ product['price'] }}</td>
+                    <td>{{ product['stock'] }}</td>
+                </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Employees {% endblock %}</h1>
+    <div>
+        <form method="post">
+            <div>
+                <label>Filter:</label>
+                <select name="filt_attr">
+                    <option value=""></option>
+                    <option value="employeeID">ID</option>
+                    <option value="fname">First</option>
+                    <option value="lname">Last</option>
+                    <option value="position">Position</option>
+                    <option value="salary">Salary</option>
+                </select>
+                <select name="op">
+                    <option value=""></option>
+                    <option value="=">=</option>
+                    <option value="<"><</option>
+                    <option value=">">></option>
+                    <option value=">=">>=</option>
+                    <option value="<="><=</option>
+                </select>
+                <input type="text" name="value">
+            </div>
+            <label>Sort:</label>
+            <select name="sort_attr" id="sort_attr">
+                <option value=""></option>
+                <option value="employeeID">ID</option>
+                <option value="fname">First</option>
+                <option value="lname">Last</option>
+                <option value="position">Position</option>
+                <option value="salary">Salary</option>
+            </select>
+            <select name="asc" id="asc">
+                <option value=""></option>
+                <option value="ASC">Ascending</option>
+                <option value="DESC">Descending</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Last Name</th>
+            <th>First Name</th>
+            <th>Position</th>
+            <th>Salary</th>
+        </tr>
+        {% for employee in employees %}
+                <tr>
+                    <td>{{ employee['employeeID'] }}</td>
+                    <td>{{ employee['lname'] }}</td>
+                    <td>{{ employee['fname'] }}</td>
+                    <td>{{ employee['position'] }}</td>
+                    <td>{{ employee['salary'] }}</td>
+                </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

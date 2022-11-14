@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Orders {% endblock %}</h1>
+    <div>
+        <form method="post">
+            <div>
+                <label>Filter:</label>
+                <select name="filt_attr">
+                    <option value=""></option>
+                    <option value="orderID">Order #</option>
+                    <option value="customerID">Customer ID</option>
+                    <option value="total">Total</option>
+                </select>
+                <select name="op">
+                    <option value=""></option>
+                    <option value="=">=</option>
+                    <option value="<"><</option>
+                    <option value=">">></option>
+                    <option value=">=">>=</option>
+                    <option value="<="><=</option>
+                </select>
+                <input type="text" name="value">
+            </div>
+            <label>Sort:</label>
+            <select name="sort_attr" id="sort_attr">
+                    <option value=""></option>
+                    <option value="orderID">Order #</option>
+                    <option value="customerID">Customer ID</option>
+                    <option value="total">Total</option>
+            </select>
+            <select name="asc" id="asc">
+                <option value=""></option>
+                <option value="ASC">Ascending</option>
+                <option value="DESC">Descending</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <table>
+        <tr>
+          <th>Order #</th>
+          <th>Customer ID</th>
+          <th>Total</th>
+        </tr>
+        {% for order in orders %}
+                <tr>
+                    <td>{{ order['orderID'] }}</td>
+                    <td>{{ order['customerID'] }}</td>
+                    <td>{{ order['total'] }}</td>
+                </tr>
+        {% endfor %}
+    </table>
+{% endblock %}
