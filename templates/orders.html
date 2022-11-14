@@ -34,19 +34,34 @@
                 <option value="ASC">Ascending</option>
                 <option value="DESC">Descending</option>
             </select>
-            <button type="submit">Submit</button>
+            <button type="submit" name="sort" value="sort">Submit</button>
+            <div>
+                <label>Add/Update:</label>
+                <input type="text" name="orderID">
+                <input type="text" name="customerID">
+                <input type="text" name="employeeID">
+                <input type="text" name="total">
+                <button type="submit" name="add" value="add">Submit</button>
+            </div>
+            <div>
+                <label>Delete:</label>
+                <input type="text" name="orderID2">
+                <button type="submit" name="del" value="del">Submit</button>
+            </div>
         </form>
     </div>
     <table>
         <tr>
           <th>Order #</th>
           <th>Customer ID</th>
+          <th>Employee ID</th>
           <th>Total</th>
         </tr>
         {% for order in orders %}
                 <tr>
                     <td>{{ order['orderID'] }}</td>
                     <td>{{ order['customerID'] }}</td>
+                    <td>{{ order['employeeID'] }}</td>
                     <td>{{ order['total'] }}</td>
                 </tr>
         {% endfor %}

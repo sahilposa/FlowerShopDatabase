@@ -96,8 +96,27 @@ class Checks:
         if cursor.fetchone() is None:
             return True
         return False
+    @staticmethod
+    def is_employeeID_exist(employeeID,cursor):
+        cursor.execute("SELECT * FROM employee WHERE employeeID=?", (employeeID,))
+        if cursor.fetchone() is None:
+            return True
+        return False
+    @staticmethod
+    def is_customerID_exist(customerID,cursor):
+        cursor.execute("SELECT * FROM customer WHERE customerID=?", (customerID,))
+        if cursor.fetchone() is None:
+            return True
+        return False
+    @staticmethod
     def is_product_exist(product,cursor):
         cursor.execute("SELECT * FROM product WHERE p_desc=?", (product,))
+        if cursor.fetchone() is None:
+            return True
+        return False
+    @staticmethod
+    def is_order_exist(orderID,cursor):
+        cursor.execute("SELECT * FROM orders WHERE orderID=?", (orderID,))
         if cursor.fetchone() is None:
             return True
         return False

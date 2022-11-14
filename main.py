@@ -168,14 +168,34 @@ def orders():
     db = Database(conn, cursor)
     orders = conn.execute("SELECT * FROM orders").fetchall()
     if request.method == "POST":
-        filt_attr = request.form["filt_attr"]
-        op = request.form["op"]
-        value = request.form["value"]
-        sort_attr = request.form["sort_attr"]
-        asc = request.form["asc"]
-        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
-            return render_template('orders.html', orders=orders)
-        orders = get_table("orders", db, filt_attr, op, value, sort_attr, asc)
+        if request.form.get('sort') == 'sort':
+            filt_attr = request.form["filt_attr"]
+            op = request.form["op"]
+            value = request.form["value"]
+            sort_attr = request.form["sort_attr"]
+            asc = request.form["asc"]
+            if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+                return render_template('orders.html', orders=orders)
+            orders = get_table("orders", db, filt_attr, op, value, sort_attr, asc)
+            return render_template("orders.html", orders=orders)
+        elif request.form.get('add') == 'add':
+            orderID = request.form["orderID"]
+            customerID = request.form["customerID"]
+            employeeID = request.form["employeeID"]
+            total = request.form["total"]
+            if (not Checks.is_customerID_exist(customerID,cursor)) and (not Checks.is_employeeID_exist(employeeID,cursor)):
+                if not (Checks.is_order_exist(orderID,cursor)):
+                    db.upd_ord(int(orderID),int(customerID),int(employeeID),float(total))
+                else:
+                    db.add_ord(int(customerID),int(employeeID),float(total))
+            orders = conn.execute("SELECT * FROM orders").fetchall()
+            return render_template("orders.html", orders=orders)
+        elif request.form.get('del') == 'del':
+            orderID = request.form["orderID2"]
+            if not (Checks.is_order_exist(orderID,cursor)):
+                db.del_ord(int(orderID))
+            orders = conn.execute("SELECT * FROM orders").fetchall()
+            return render_template("orders.html", orders=orders)
     return render_template("orders.html", orders=orders)
 
 
