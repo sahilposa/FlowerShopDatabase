@@ -54,7 +54,7 @@ def place_ord():
     return render_template('placeOrder.html', products=products)
 
     
-app.run()
+app.run(debug=True)
 
 
 

@@ -1,19 +1,8 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Customers {% endblock %}</h1>
-    <table>
-        <tr>
-            <th>Last Name</th>
-            <th>First Name</th>
-            <th>Phone</th>
-        </tr>
-        {% for customer in customers %}
-                <tr>
-                    <td>{{ customer['lname'] }}</td>
-                    <td>{{ customer['fname'] }}</td>
-                    <td>{{ customer['phone'] }}</td>
-                </tr>
-        {% endfor %}
-    </table>
+    <h1>{% block title %} Links {% endblock %}</h1>
+    <a href="http://127.0.0.1:5000/place-order">  
+        <button>Place Order</button>  
+      </a>
 {% endblock %}
