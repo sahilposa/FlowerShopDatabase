@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <h1>{% block title %} Place Order {% endblock %}</h1>
+    <form method='post'>
+        <table>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Quantity</th>
+            </tr>
+            {% for product in products %}
+                <tr>
+                    <td>{{ product['p_desc'] }}</td>
+                    <td>{{ product['price'] }}</td>
+                    <td><input type="number" name="quantity" id="{{ product['productID'] }}" min="0" max="{{ product['stock'] }}" value="0" required> </td>
+                </tr>
+            {% endfor %}
+        </table>
+        <button type="reset">Reset</button>
+        <button type="submit">Submit</button>
+    </form>
+{% endblock %}
