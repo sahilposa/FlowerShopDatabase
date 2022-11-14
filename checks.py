@@ -89,3 +89,10 @@ class Checks:
             flash("Must choose both sort options or neither.")
             return False
         return True
+
+    @staticmethod
+    def is_employee_exist(fname,lname,cursor):
+        cursor.execute("SELECT * FROM employee WHERE fname=? and lname=?", (fname,lname))
+        if cursor.fetchone() is None:
+            return True
+        return False

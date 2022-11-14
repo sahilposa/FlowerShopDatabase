@@ -85,23 +85,46 @@ def customers():
 @app.route("/employee", methods=("GET", "POST"))
 def employee():
     conn = get_db_connection()
+    cursor = conn.cursor()
     db = Database(conn, cursor)
     employees = conn.execute("SELECT * FROM employee").fetchall()
     if request.method == "POST":
-        filt_attr = request.form["filt_attr"]
-        op = request.form["op"]
-        value = request.form["value"]
-        sort_attr = request.form["sort_attr"]
-        asc = request.form["asc"]
-        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
-            return render_template('employee.html', employees=employees)
-        employees = get_table("employee", db, filt_attr, op, value, sort_attr, asc)
+        if request.form.get('sort') == 'sort':
+            filt_attr = request.form["filt_attr"]
+            op = request.form["op"]
+            value = request.form["value"]
+            sort_attr = request.form["sort_attr"]
+            asc = request.form["asc"]
+            if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+                return render_template('employee.html', employees=employees)
+            employees = get_table("employee", db, filt_attr, op, value, sort_attr, asc)
+            return render_template("employee.html", employees=employees)
+        elif request.form.get('add') == 'add':
+            lname = request.form["lname"]
+            fname = request.form["fname"]
+            position = request.form["position"]
+            salary = request.form["salary"]
+            if not (Checks.is_employee_exist(fname,lname,cursor)):
+                x = conn.execute("SELECT employeeID FROM employee where fname=? and lname=?",(fname,lname)).fetchall()[0][0]
+                db.upd_emp(x,fname,lname,position,salary)
+            else:
+                db.add_emp(fname,lname,position,salary)
+            employees = conn.execute("SELECT * FROM employee").fetchall()
+            return render_template("employee.html", employees=employees)
+        elif request.form.get('del') == 'del':
+            lname = request.form["lname2"]
+            fname = request.form["fname2"]
+            employeeID = conn.execute("SELECT employeeID FROM employee where fname=? and lname=?",(fname,lname)).fetchall()[0][0]
+            db.del_emp(employeeID)
+            employees = conn.execute("SELECT * FROM employee").fetchall()
+            return render_template("employee.html", employees=employees)
     return render_template("employee.html", employees=employees)
 
 
 @app.route("/product", methods=("GET", "POST"))
 def product():
     conn = get_db_connection()
+    cursor = conn.cursor()
     db= Database(conn, cursor)
     products = conn.execute("SELECT * FROM product").fetchall()
     if request.method == "POST":
@@ -119,6 +142,7 @@ def product():
 @app.route("/orders", methods=("GET", "POST"))
 def orders():
     conn = get_db_connection()
+    cursor = conn.cursor()
     db = Database(conn, cursor)
     orders = conn.execute("SELECT * FROM orders").fetchall()
     if request.method == "POST":
@@ -136,6 +160,7 @@ def orders():
 @app.route("/purchase", methods=("GET", "POST"))
 def purchase():
     conn = get_db_connection()
+    cursor = conn.cursor()
     db = Database(conn, cursor)
     purchases = conn.execute("SELECT * FROM purchase").fetchall()
     if request.method == "POST":
@@ -153,6 +178,7 @@ def purchase():
 @app.route("/place-order", methods=("GET", "POST"))
 def place_ord():
     conn = get_db_connection()
+    cursor = conn.cursor()
     cursor = conn.cursor()
     products = conn.execute("SELECT * FROM product")
     id = 1
