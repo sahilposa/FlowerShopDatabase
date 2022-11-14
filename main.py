@@ -5,6 +5,7 @@ from database import Database
 from schema import Schema
 from flask import Flask, render_template, request, url_for, flash, redirect
 import os
+from checks import Checks
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = str(os.urandom(24).hex())
@@ -14,8 +15,7 @@ conn.execute("PRAGMA foreign_keys = 1")
 cursor = conn.cursor()
 db = Database(conn,cursor)
 Schema.build(conn, cursor)
-conn.close()
-
+conn.commit()
 
 def get_db_connection():
     conn = sqlite3.connect('flowershopdatabase.db', check_same_thread=False)
@@ -48,17 +48,37 @@ def get_table(table_name, db, filt_attr, op, value, sort_attr, asc):
 @app.route("/customer", methods=("GET", "POST"))
 def customers():
     conn = get_db_connection()
+    cursor = conn.cursor()
     db = Database(conn,cursor)
     customers = conn.execute("SELECT * FROM customer").fetchall()
     if request.method == "POST":
-        filt_attr = request.form["filt_attr"]
-        op = request.form["op"]
-        value = request.form["value"]
-        sort_attr = request.form["sort_attr"]
-        asc = request.form["asc"]
-        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+        if request.form.get('sort') == 'sort':
+            filt_attr = request.form["filt_attr"]
+            op = request.form["op"]
+            value = request.form["value"]
+            sort_attr = request.form["sort_attr"]
+            asc = request.form["asc"]
+            if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+                return render_template('customer.html', customers=customers)
+            customers = get_table("customer", db, filt_attr, op, value, sort_attr, asc)
             return render_template('customer.html', customers=customers)
-        customers = get_table("customer", db, filt_attr, op, value, sort_attr, asc)
+        elif request.form.get('add') == 'add':
+            lname = request.form["lname"]
+            fname = request.form["fname"]
+            phone = request.form["phone"]
+            if not (Checks.is_phone_unique(phone, cursor)):
+                x = conn.execute("SELECT customerID FROM customer where phone = "+phone).fetchall()[0][0]
+                db.upd_cus(x,fname,lname,phone)
+            else:
+                db.add_cus(fname,lname,phone)
+            customers = conn.execute("SELECT * FROM customer").fetchall()
+            return render_template('customer.html', customers=customers)
+        elif request.form.get('del') == 'del':
+            phone = request.form["phone2"]
+            customerID = conn.execute("SELECT customerID FROM customer where phone = "+phone).fetchall()[0][0]
+            db.del_cus(customerID)
+            customers = conn.execute("SELECT * FROM customer").fetchall()
+            return render_template('customer.html', customers=customers)
     return render_template('customer.html', customers=customers)
 
 
@@ -156,6 +176,7 @@ def place_ord():
 
     
 app.run(debug=True)
+conn.close()
 
 
 
