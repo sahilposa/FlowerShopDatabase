@@ -42,15 +42,16 @@ def index():
 def place_ord():
     conn = get_db_connection()
     products = conn.execute("SELECT * FROM product")
-    if request.method == 'post':
+    if request.method == "POST":
+        print("in post")
         roses = request.form['1']
         flower2 = request.form['2']
         flower3 = request.form['3']
         flower4 = request.form['4']
         flower5 = request.form['5']
-        return redirect("/")
-    else:
-        return render_template('placeOrder.html', products=products)
+        print(roses)
+        redirect(url_for('index'))
+    return render_template('placeOrder.html', products=products)
 
     
 app.run()
