@@ -30,6 +30,12 @@ def index():
     cursor = conn.cursor()
     conn.close()
     return render_template('index.html')
+@app.route("/about")
+def about():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    conn.close()
+    return render_template('about.html')
 
 # retrieves tables for list pages
 def get_table(table_name, db, filt_attr, op, value, sort_attr, asc):
