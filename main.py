@@ -75,8 +75,9 @@ def customers():
             return render_template('customer.html', customers=customers)
         elif request.form.get('del') == 'del':
             phone = request.form["phone2"]
-            customerID = conn.execute("SELECT customerID FROM customer where phone = "+phone).fetchall()[0][0]
-            db.del_cus(customerID)
+            if not (Checks.is_phone_unique(phone, cursor)):
+                customerID = conn.execute("SELECT customerID FROM customer where phone = "+phone).fetchall()[0][0]
+                db.del_cus(customerID)
             customers = conn.execute("SELECT * FROM customer").fetchall()
             return render_template('customer.html', customers=customers)
     return render_template('customer.html', customers=customers)
@@ -114,28 +115,49 @@ def employee():
         elif request.form.get('del') == 'del':
             lname = request.form["lname2"]
             fname = request.form["fname2"]
-            employeeID = conn.execute("SELECT employeeID FROM employee where fname=? and lname=?",(fname,lname)).fetchall()[0][0]
-            db.del_emp(employeeID)
+            if not (Checks.is_employee_exist(fname,lname,cursor)):
+                employeeID = conn.execute("SELECT employeeID FROM employee where fname=? and lname=?",(fname,lname)).fetchall()[0][0]
+                db.del_emp(employeeID)
             employees = conn.execute("SELECT * FROM employee").fetchall()
             return render_template("employee.html", employees=employees)
     return render_template("employee.html", employees=employees)
 
 
-@app.route("/product", methods=("GET", "POST"))
+@app.route("/products", methods=("GET", "POST"))
 def product():
     conn = get_db_connection()
     cursor = conn.cursor()
     db= Database(conn, cursor)
     products = conn.execute("SELECT * FROM product").fetchall()
     if request.method == "POST":
-        filt_attr = request.form["filt_attr"]
-        op = request.form["op"]
-        value = request.form["value"]
-        sort_attr = request.form["sort_attr"]
-        asc = request.form["asc"]
-        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
-            return render_template('products.html', products=products)
-        products = get_table("product", db, filt_attr, op, value, sort_attr, asc)
+        if request.form.get('sort') == 'sort':
+            filt_attr = request.form["filt_attr"]
+            op = request.form["op"]
+            value = request.form["value"]
+            sort_attr = request.form["sort_attr"]
+            asc = request.form["asc"]
+            if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+                return render_template('products.html', products=products)
+            products = get_table("product", db, filt_attr, op, value, sort_attr, asc)
+            return render_template("products.html", products=products)
+        elif request.form.get('add') == 'add':
+            product = request.form["product"]
+            price = request.form["price"]
+            quantity = request.form["quantity"]
+            if not (Checks.is_product_exist(product,cursor)):
+                productID = conn.execute("SELECT productID FROM product where p_desc=?",(product,)).fetchall()[0][0]
+                db.upd_prod(productID,product,price,quantity)
+            else:
+                db.add_prod(product,price,quantity)
+            products = conn.execute("SELECT * FROM product").fetchall()
+            return render_template("products.html", products=products)
+        elif request.form.get('del') == 'del':
+            product = request.form["product2"]
+            if not (Checks.is_product_exist(product,cursor)):
+                productID = conn.execute("SELECT productID FROM product where p_desc=?",(product,)).fetchall()[0][0]
+                db.del_prod(productID)
+            products = conn.execute("SELECT * FROM product").fetchall()
+            return render_template("products.html", products=products)
     return render_template("products.html", products=products)
 
 

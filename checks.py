@@ -96,3 +96,8 @@ class Checks:
         if cursor.fetchone() is None:
             return True
         return False
+    def is_product_exist(product,cursor):
+        cursor.execute("SELECT * FROM product WHERE p_desc=?", (product,))
+        if cursor.fetchone() is None:
+            return True
+        return False
