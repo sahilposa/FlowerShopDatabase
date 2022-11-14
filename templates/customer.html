@@ -2,6 +2,39 @@
 
 {% block content %}
     <h1>{% block title %} Customers {% endblock %}</h1>
+    <div>
+        <form method="post">
+            <div>
+                <label>Filter:</label>
+                <select name="filt_attr">
+                    <option value=""></option>
+                    <option value="fname">First</option>
+                    <option value="lname">Last</option>
+                    <option value="phone">Phone</option>
+                </select>
+                <select name="op">
+                    <option value=""></option>
+                    <option value="=">=</option>
+                    <option value="<"><</option>
+                    <option value=">">></option>
+                </select>
+                <input type="text" name="value">
+            </div>
+            <label>Sort:</label>
+            <select name="sort_attr" id="sort_attr">
+                <option value=""></option>
+                <option value="fname">First</option>
+                <option value="lname">Last</option>
+                <option value="phone">Phone</option>
+            </select>
+            <select name="asc" id="asc">
+                <option value=""></option>
+                <option value="ASC">Ascending</option>
+                <option value="DESC">Descending</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
     <table>
         <tr>
             <th>Last Name</th>
