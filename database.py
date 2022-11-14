@@ -62,6 +62,16 @@ class Database:
         self.cursor.execute("INSERT INTO orders (customerID, employeeID, total) VALUES (?, ?, ?)",
                        (customerID, employeeID, float(total)))
         self.conn.commit()
+    def add_pur(self,orderID,productID,quantity):
+        if not Checks.is_pos_num(orderID, "int", "orderID"):
+            return
+        if not Checks.is_pos_num(productID, "int", "productID"):
+            return
+        if not Checks.is_pos_num(quantity, "int", "quantity"):
+            return
+        self.cursor.execute("INSERT INTO purchase (orderID, productID, quantity) VALUES (?, ?, ?)",
+                       (orderID, productID, quantity))
+        self.conn.commit()
     #update function for customer table
     def upd_cus(self, customerID, fname, lname, phone):
         if not Checks.is_phone(phone):
@@ -110,6 +120,15 @@ class Database:
             return
         self.cursor.execute("UPDATE ORDERS SET CUSTOMERID = ?, EMPLOYEEID = ?, TOTAL = ? WHERE ORDERID = ?",(customerID, employeeID, total,orderID))
         self.conn.commit()
+    def upd_pur(self,orderID,productID,quantity):
+        if not Checks.is_pos_num(orderID, "int", "orderID"):
+            return
+        if not Checks.is_pos_num(productID, "int", "productID"):
+            return
+        if not Checks.is_pos_num(quantity, "int", "quantity"):
+            return
+        self.cursor.execute("UPDATE Purchase SET quantity = ? WHERE orderID = ? and PRODUCTID = ?",(quantity, orderID, productID))
+        self.conn.commit()
     #delete function for customer table
     def del_cus(self,customerID):
         if not Checks.is_pos_num(customerID, "int", "customerID"):
@@ -133,6 +152,14 @@ class Database:
         if not Checks.is_pos_num(orderID, "int", "orderID"):
             return
         self.cursor.execute("DELETE FROM ORDERS WHERE ORDERID = "+str(orderID))
+        self.conn.commit()
+    #delete function for purchasetable
+    def del_pur(self,orderID,productID):
+        if not Checks.is_pos_num(orderID, "int", "orderID"):
+            return
+        if not Checks.is_pos_num(productID, "int", "productID"):
+            return
+        self.cursor.execute("DELETE FROM purchase WHERE orderID=? and PRODUCTID = ?",(orderID,productID))
         self.conn.commit()
     #sorted select functions
     def sort_table(self,table,order,asc):

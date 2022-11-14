@@ -115,8 +115,20 @@ class Checks:
             return True
         return False
     @staticmethod
+    def is_productID_exist(productID,cursor):
+        cursor.execute("SELECT * FROM product WHERE productID=?", (productID,))
+        if cursor.fetchone() is None:
+            return True
+        return False
+    @staticmethod
     def is_order_exist(orderID,cursor):
         cursor.execute("SELECT * FROM orders WHERE orderID=?", (orderID,))
+        if cursor.fetchone() is None:
+            return True
+        return False
+    @staticmethod
+    def is_purchase_exist(orderID,productID,cursor):
+        cursor.execute("SELECT * FROM purchase WHERE orderID=? and productID=?", (orderID,productID))
         if cursor.fetchone() is None:
             return True
         return False

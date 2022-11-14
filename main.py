@@ -206,14 +206,34 @@ def purchase():
     db = Database(conn, cursor)
     purchases = conn.execute("SELECT * FROM purchase").fetchall()
     if request.method == "POST":
-        filt_attr = request.form["filt_attr"]
-        op = request.form["op"]
-        value = request.form["value"]
-        sort_attr = request.form["sort_attr"]
-        asc = request.form["asc"]
-        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
-            return render_template('purchase.html', purchases=purchases)
-        purchases = get_table("purchase", db, filt_attr, op, value, sort_attr, asc)
+        if request.form.get('sort') == 'sort':
+            filt_attr = request.form["filt_attr"]
+            op = request.form["op"]
+            value = request.form["value"]
+            sort_attr = request.form["sort_attr"]
+            asc = request.form["asc"]
+            if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+                return render_template('purchase.html', purchases=purchases)
+            purchases = get_table("purchase", db, filt_attr, op, value, sort_attr, asc)
+            return render_template("purchase.html", purchases=purchases)
+        elif request.form.get('add') == 'add':
+            orderID = request.form["orderID"]
+            productID = request.form["productID"]
+            quantity = request.form["quantity"]
+            if (not Checks.is_order_exist(orderID,cursor)) and (not Checks.is_productID_exist(productID,cursor)):
+                if not (Checks.is_purchase_exist(orderID,productID,cursor)):
+                    db.upd_pur(orderID,productID,quantity)
+                else:
+                    db.add_pur(orderID,productID,quantity)
+            purchases = conn.execute("SELECT * FROM purchase").fetchall()
+            return render_template("purchase.html", purchases=purchases)
+        elif request.form.get('del') == 'del':
+            orderID = request.form["orderID2"]
+            productID = request.form["productID2"]
+            if not (Checks.is_purchase_exist(orderID,productID,cursor)):
+                db.del_pur(orderID,productID)
+            purchases = conn.execute("SELECT * FROM purchase").fetchall()
+            return render_template("purchase.html", purchases=purchases)
     return render_template("purchase.html", purchases=purchases)
 
 
