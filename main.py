@@ -31,11 +31,44 @@ def index():
     conn.close()
     return render_template('index.html')
 
-@app.route("/customer")
+# checks validity of sorting/filtering options for customers
+def is_cus_valid(filt_attr, op, value, sort_attr, asc):
+    if not Checks.is_filt_valid(filt_attr, op, value):
+        flash("Must fill all filter options or none.")
+        return False
+    if not Checks.is_sort_valid(sort_attr, asc):
+        flash("Must choose both sort options or neither.")
+        return False
+    return True
+
+# returns properly sorted/filtered customers list
+def get_customers(db, filt_attr, op, value, sort_attr, asc):
+    filt_blank = Checks.is_filt_blank(filt_attr, op, value)
+    sort_blank = Checks.is_sort_blank(sort_attr, asc)
+    if filt_blank and sort_blank:
+        return db.conn.execute("SELECT * FROM customer").fetchall()
+    elif not filt_blank and sort_blank:
+        return db.filter_table("customer", filt_attr, value, op)
+    elif filt_blank and not sort_blank:
+        return db.sort_table("customer", sort_attr, asc)
+    else:
+        return db.sort_filter("customer", sort_attr, asc, filt_attr, value, op)
+
+
+@app.route("/customer", methods=("GET", "POST"))
 def customers():
     conn = get_db_connection()
     db = Database(conn,cursor)
-    customers = db.sort_filter('customer','customerID','DESC','lname','\'Kincheloe\'','=')
+    customers = conn.execute("SELECT * FROM customer").fetchall()
+    if request.method == "POST":
+        filt_attr = request.form["filt_attr"]
+        op = request.form["op"]
+        value = request.form["value"]
+        sort_attr = request.form["sort_attr"]
+        asc = request.form["asc"]
+        if not is_cus_valid(filt_attr, op, value, sort_attr, asc):
+            return render_template('customer.html', customers=customers)
+        customers = get_customers(db, filt_attr, op, value, sort_attr, asc)
     return render_template('customer.html', customers=customers)
 
 
