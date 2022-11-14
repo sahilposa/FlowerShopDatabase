@@ -32,10 +32,15 @@ def get_db_connection():
 def index():
     conn = get_db_connection()
     cursor = conn.cursor()
+    conn.close()
+    return render_template('index.html')
+
+@app.route("/customer")
+def customers():
+    conn = get_db_connection()
     db = Database(conn,cursor)
     customers = db.sort_filter('customer','customerID','DESC','lname','\'Kincheloe\'','=')
-    conn.close()
-    return render_template('index.html', customers=customers)
+    return render_template('customer.html', customers=customers)
 
 
 @app.route("/place-order", methods=("GET", "POST"))
