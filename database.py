@@ -143,3 +143,32 @@ class Database:
     #sorts and filters
     def sort_filter(self,table,order,asc,target,value,op):
         return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value+" ORDER BY "+order+" "+asc).fetchall()
+    #handles transactions for placing orders
+    def ord_transaction(self, phone, list):
+        with self.conn:
+            self.cursor.execute("BEGIN")
+            try:
+                if phone is not None:
+                    customerID = int(self.cursor.execute("SELECT customerID FROM customer WHERE phone=?",
+                                                         (phone,)).fetchone()[0])
+                else:
+                    customerID = None
+                self.cursor.execute("INSERT INTO orders (customerID, employeeID, total) VALUES (?, ?, ?)",
+                                    (customerID, None, 0))
+                orderID = self.cursor.execute("SELECT MAX(orderID) from orders").fetchone()[0]
+                for x in range(len(list)):
+                    if int(list[x]) > 0:
+                        self.cursor.execute("INSERT INTO purchase (orderID, productID, quantity) VALUES (?, ?, ?)",
+                                            (orderID, x+1, int(list[x])))
+                        price = self.cursor.execute("SELECT price FROM product WHERE productID=?",
+                                                    (x+1,)).fetchone()[0]
+                        self.cursor.execute("UPDATE orders SET total=? WHERE orderID=?",
+                                            (self.cursor.execute("SELECT total FROM orders WHERE orderID=?",
+                                                                 (orderID,)).fetchone()[0] + int(list[x]) * price, orderID))
+                        self.cursor.execute("UPDATE product SET stock=? WHERE productID=?",
+                                            ((self.cursor.execute("SELECT stock FROM product WHERE productID=?",
+                                                                  (x+1,)).fetchone()[0] - int(list[x])), x+1))
+                self.conn.commit()
+            except sqlite3.Error:
+                print("transaction failed")
+                self.cursor.execute("ROLLBACK")
