@@ -14,7 +14,7 @@
                 <tr>
                     <td>{{ product['p_desc'] }}</td>
                     <td>{{ product['price'] }}</td>
-                    <td><input type="number" name="quantity" id="{{ product['productID'] }}" min="0" max="{{ product['stock'] }}" value="0" required> </td>
+                    <td><input type="number" name="{{ product['productID'] }}" id="{{ product['productID'] }}" min="0" max="{{ product['stock'] }}" value="0" required> </td>
                 </tr>
             {% endfor %}
         </table>
