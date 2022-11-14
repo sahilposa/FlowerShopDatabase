@@ -31,28 +31,18 @@ def index():
     conn.close()
     return render_template('index.html')
 
-# checks validity of sorting/filtering options for customers
-def is_cus_valid(filt_attr, op, value, sort_attr, asc):
-    if not Checks.is_filt_valid(filt_attr, op, value):
-        flash("Must fill all filter options or none.")
-        return False
-    if not Checks.is_sort_valid(sort_attr, asc):
-        flash("Must choose both sort options or neither.")
-        return False
-    return True
-
-# returns properly sorted/filtered customers list
-def get_customers(db, filt_attr, op, value, sort_attr, asc):
+# retrieves tables for list pages
+def get_table(table_name, db, filt_attr, op, value, sort_attr, asc):
     filt_blank = Checks.is_filt_blank(filt_attr, op, value)
     sort_blank = Checks.is_sort_blank(sort_attr, asc)
     if filt_blank and sort_blank:
-        return db.conn.execute("SELECT * FROM customer").fetchall()
+        return db.conn.execute("SELECT * FROM " + table_name).fetchall()
     elif not filt_blank and sort_blank:
-        return db.filter_table("customer", filt_attr, value, op)
+        return db.filter_table(table_name, filt_attr, value, op)
     elif filt_blank and not sort_blank:
-        return db.sort_table("customer", sort_attr, asc)
+        return db.sort_table(table_name, sort_attr, asc)
     else:
-        return db.sort_filter("customer", sort_attr, asc, filt_attr, value, op)
+        return db.sort_filter(table_name, sort_attr, asc, filt_attr, value, op)
 
 
 @app.route("/customer", methods=("GET", "POST"))
@@ -66,10 +56,78 @@ def customers():
         value = request.form["value"]
         sort_attr = request.form["sort_attr"]
         asc = request.form["asc"]
-        if not is_cus_valid(filt_attr, op, value, sort_attr, asc):
+        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
             return render_template('customer.html', customers=customers)
-        customers = get_customers(db, filt_attr, op, value, sort_attr, asc)
+        customers = get_table("customer", db, filt_attr, op, value, sort_attr, asc)
     return render_template('customer.html', customers=customers)
+
+
+@app.route("/employee", methods=("GET", "POST"))
+def employee():
+    conn = get_db_connection()
+    db = Database(conn, cursor)
+    employees = conn.execute("SELECT * FROM employee").fetchall()
+    if request.method == "POST":
+        filt_attr = request.form["filt_attr"]
+        op = request.form["op"]
+        value = request.form["value"]
+        sort_attr = request.form["sort_attr"]
+        asc = request.form["asc"]
+        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+            return render_template('employee.html', employees=employees)
+        employees = get_table("employee", db, filt_attr, op, value, sort_attr, asc)
+    return render_template("employee.html", employees=employees)
+
+
+@app.route("/product", methods=("GET", "POST"))
+def product():
+    conn = get_db_connection()
+    db= Database(conn, cursor)
+    products = conn.execute("SELECT * FROM product").fetchall()
+    if request.method == "POST":
+        filt_attr = request.form["filt_attr"]
+        op = request.form["op"]
+        value = request.form["value"]
+        sort_attr = request.form["sort_attr"]
+        asc = request.form["asc"]
+        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+            return render_template('products.html', products=products)
+        products = get_table("product", db, filt_attr, op, value, sort_attr, asc)
+    return render_template("products.html", products=products)
+
+
+@app.route("/orders", methods=("GET", "POST"))
+def orders():
+    conn = get_db_connection()
+    db = Database(conn, cursor)
+    orders = conn.execute("SELECT * FROM orders").fetchall()
+    if request.method == "POST":
+        filt_attr = request.form["filt_attr"]
+        op = request.form["op"]
+        value = request.form["value"]
+        sort_attr = request.form["sort_attr"]
+        asc = request.form["asc"]
+        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+            return render_template('orders.html', orders=orders)
+        orders = get_table("orders", db, filt_attr, op, value, sort_attr, asc)
+    return render_template("orders.html", orders=orders)
+
+
+@app.route("/purchase", methods=("GET", "POST"))
+def purchase():
+    conn = get_db_connection()
+    db = Database(conn, cursor)
+    purchases = conn.execute("SELECT * FROM purchase").fetchall()
+    if request.method == "POST":
+        filt_attr = request.form["filt_attr"]
+        op = request.form["op"]
+        value = request.form["value"]
+        sort_attr = request.form["sort_attr"]
+        asc = request.form["asc"]
+        if not Checks.sort_filt_valid(filt_attr, op, value, sort_attr, asc):
+            return render_template('purchase.html', purchases=purchases)
+        purchases = get_table("purchase", db, filt_attr, op, value, sort_attr, asc)
+    return render_template("purchase.html", purchases=purchases)
 
 
 @app.route("/place-order", methods=("GET", "POST"))
