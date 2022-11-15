@@ -250,8 +250,8 @@ class Database:
                         price = self.cursor.execute("SELECT price FROM product WHERE productID=?",
                                                     (x+1,)).fetchone()[0]
                         self.cursor.execute("UPDATE orders SET total=? WHERE orderID=?",
-                                            (self.cursor.execute("SELECT total FROM orders WHERE orderID=?",
-                                                                 (orderID,)).fetchone()[0] + int(list[x]) * price, orderID))
+                                            (round(self.cursor.execute("SELECT total FROM orders WHERE orderID=?",
+                                                                 (orderID,)).fetchone()[0] + int(list[x]) * price, 2), orderID))
                         self.cursor.execute("UPDATE product SET stock=? WHERE productID=?",
                                             ((self.cursor.execute("SELECT stock FROM product WHERE productID=?",
                                                                   (x+1,)).fetchone()[0] - int(list[x])), x+1))
