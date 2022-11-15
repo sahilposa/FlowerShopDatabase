@@ -253,10 +253,16 @@ def place_ord():
     if request.method == "POST":
         phone = request.form['phone']
         employeeID = request.form['employeeID']
-        if not phone:
-            phone = None
         if not employeeID:
             employeeID = None
+        elif cursor.execute("SELECT * FROM employee WHERE employeeID=?",
+                            (int(employeeID),)).fetchone() is None:
+            flash("EmployeeID not found")
+            return render_template('placeOrder.html', products=products)
+        else:
+            employeeID=int(employeeID)
+        if not phone:
+            phone = None
         elif cursor.execute("SELECT * FROM customer WHERE phone=?", (int(phone),)).fetchone() is None:
             flash("Phone not found")
             return render_template('placeOrder.html', products=products)
