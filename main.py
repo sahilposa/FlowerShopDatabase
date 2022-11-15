@@ -69,14 +69,33 @@ def customers():
             customers = get_table("customer", db, filt_attr, op, value, sort_attr, asc)
             return render_template('customer.html', customers=customers)
         elif request.form.get('add') == 'add':
+            customerID = request.form["customerID"]
             lname = request.form["lname"]
             fname = request.form["fname"]
             phone = request.form["phone"]
-            if not (Checks.is_phone_unique(phone, cursor)):
-                x = conn.execute("SELECT customerID FROM customer where phone = "+phone).fetchall()[0][0]
-                db.upd_cus(x,fname,lname,phone)
+            if not customerID:
+                if not lname or not fname or not phone:
+                    flash("Last, first, and phone all required for adding.")
+                    return render_template("customer.html", customers=customers)
+                if Checks.is_phone_unique(phone, cursor):
+                    db.add_cus(fname, lname, phone)
+                else:
+                    flash("Phone number already on file.")
+                    return render_template("customer.html", customers=customers)
+            elif cursor.execute("SELECT * FROM customer WHERE customerID=?", (customerID,)).fetchone() is None:
+                flash("Customer ID does not exist. Only fill customer ID field for updating.")
+                return render_template("customer.html", customers=customers)
             else:
-                db.add_cus(fname,lname,phone)
+                if not lname:
+                    lname = None
+                if not fname:
+                    fname = None
+                if not phone:
+                    phone = None
+                if phone is not None and not Checks.is_phone_unique(phone, cursor):
+                    flash("Phone number already on file.")
+                    return render_template("customer.html", customers=customers)
+                db.upd_cus(customerID, fname, lname, phone)
             customers = conn.execute("SELECT * FROM customer").fetchall()
             return render_template('customer.html', customers=customers)
         elif request.form.get('del') == 'del':
@@ -107,23 +126,37 @@ def employee():
             employees = get_table("employee", db, filt_attr, op, value, sort_attr, asc)
             return render_template("employee.html", employees=employees)
         elif request.form.get('add') == 'add':
+            employeeID = request.form["employeeID"]
             lname = request.form["lname"]
             fname = request.form["fname"]
             position = request.form["position"]
             salary = request.form["salary"]
-            if not (Checks.is_employee_exist(fname,lname,cursor)):
-                x = conn.execute("SELECT employeeID FROM employee where fname=? and lname=?",(fname,lname)).fetchall()[0][0]
-                db.upd_emp(x,fname,lname,position,salary)
+            if not employeeID:
+                if not lname or not fname or not position or not salary:
+                    flash("Last, First, Position, and Salary all required for adding.")
+                    return render_template("employee.html", employees=employees)
+                db.add_emp(fname, lname, position, salary)
+            elif cursor.execute("SELECT * FROM employee WHERE employeeID=?", (employeeID,)).fetchone() is None:
+                flash("Employee ID does not exist. Only fill employee ID field for updating.")
+                return render_template("employee.html", employees=employees)
             else:
-                db.add_emp(fname,lname,position,salary)
+                if not lname:
+                    lname = None
+                if not fname:
+                    fname = None
+                if not position:
+                    position = None
+                if not salary:
+                    salary = None
+                db.upd_emp(employeeID, fname, lname, position, salary)
             employees = conn.execute("SELECT * FROM employee").fetchall()
             return render_template("employee.html", employees=employees)
         elif request.form.get('del') == 'del':
-            lname = request.form["lname2"]
-            fname = request.form["fname2"]
-            if not (Checks.is_employee_exist(fname,lname,cursor)):
-                employeeID = conn.execute("SELECT employeeID FROM employee where fname=? and lname=?",(fname,lname)).fetchall()[0][0]
+            employeeID = request.form["employeeID2"]
+            if cursor.execute("SELECT * FROM employee WHERE employeeID=?", (employeeID,)).fetchone() is not None:
                 db.del_emp(employeeID)
+            else:
+                flash("Employee ID does not exist.")
             employees = conn.execute("SELECT * FROM employee").fetchall()
             return render_template("employee.html", employees=employees)
     return render_template("employee.html", employees=employees)
@@ -147,21 +180,34 @@ def product():
             products = get_table("product", db, filt_attr, op, value, sort_attr, asc)
             return render_template("products.html", products=products)
         elif request.form.get('add') == 'add':
+            productID = request.form["productID"]
             product = request.form["product"]
             price = request.form["price"]
             quantity = request.form["quantity"]
-            if not (Checks.is_product_exist(product,cursor)):
-                productID = conn.execute("SELECT productID FROM product where p_desc=?",(product,)).fetchall()[0][0]
-                db.upd_prod(productID,product,price,quantity)
+            if not productID:
+                if not product or not price or not quantity:
+                    flash("Product, price, and quantity all required for adding.")
+                    return render_template("products.html", products=products)
+                db.add_prod(product, price, quantity)
+            elif cursor.execute("SELECT * FROM product WHERE productID=?", (productID,)).fetchone() is None:
+                flash("Product ID does not exist. Only fill product ID field for updating.")
+                return render_template("products.html", products=products)
             else:
-                db.add_prod(product,price,quantity)
+                if not product:
+                    product = None
+                if not price:
+                    price = None
+                if not quantity:
+                    quantity = None
+                db.upd_prod(productID,product,price,quantity)
             products = conn.execute("SELECT * FROM product").fetchall()
             return render_template("products.html", products=products)
         elif request.form.get('del') == 'del':
-            product = request.form["product2"]
-            if not (Checks.is_product_exist(product,cursor)):
-                productID = conn.execute("SELECT productID FROM product where p_desc=?",(product,)).fetchall()[0][0]
+            productID = request.form["productID2"]
+            if cursor.execute("SELECT * FROM product WHERE productID=?", (productID,)).fetchone() is not None:
                 db.del_prod(productID)
+            else:
+                flash("Product ID does not exist.")
             products = conn.execute("SELECT * FROM product").fetchall()
             return render_template("products.html", products=products)
     return render_template("products.html", products=products)
@@ -188,12 +234,26 @@ def orders():
             orderID = request.form["orderID"]
             customerID = request.form["customerID"]
             employeeID = request.form["employeeID"]
-            total = request.form["total"]
-            if (not Checks.is_customerID_exist(customerID,cursor)) and (not Checks.is_employeeID_exist(employeeID,cursor)):
-                if not (Checks.is_order_exist(orderID,cursor)):
-                    db.upd_ord(int(orderID),int(customerID),int(employeeID),float(total))
+            if not customerID:
+                customerID = None
+            if not employeeID:
+                employeeID = None
+            if not orderID:
+                flash("Order # required for updates.")
+                return render_template("orders.html", orders=orders)
+            if customerID is None or not Checks.is_customerID_exist(customerID,cursor):
+                if employeeID is None or not Checks.is_employeeID_exist(employeeID,cursor):
+                    if not (Checks.is_order_exist(orderID,cursor)):
+                        db.upd_ord(orderID ,customerID, employeeID)
+                    else:
+                        flash("Order # does not exist.")
+                        return render_template("orders.html", orders=orders)
                 else:
-                    db.add_ord(int(customerID),int(employeeID),float(total))
+                    flash("Employee ID does not exist.")
+                    return render_template("orders.html", orders=orders)
+            else:
+                flash("Customer ID does not exist.")
+                return render_template("orders.html", orders=orders)
             orders = conn.execute("SELECT * FROM orders").fetchall()
             return render_template("orders.html", orders=orders)
         elif request.form.get('del') == 'del':
@@ -230,7 +290,8 @@ def purchase():
                 if not (Checks.is_purchase_exist(orderID,productID,cursor)):
                     db.upd_pur(orderID,productID,quantity)
                 else:
-                    db.add_pur(orderID,productID,quantity)
+                    flash("Purchase does not exist.")
+                    return render_template("purchase.html", purchases=purchases)
             purchases = conn.execute("SELECT * FROM purchase").fetchall()
             return render_template("purchase.html", purchases=purchases)
         elif request.form.get('del') == 'del':

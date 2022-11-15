@@ -1,4 +1,5 @@
 from checks import Checks
+from flask import flash
 import sqlite3
 
 
@@ -75,18 +76,32 @@ class Database:
         self.conn.commit()
     #update function for customer table
     def upd_cus(self, customerID, fname, lname, phone):
-        if not Checks.is_phone(phone):
-            print("Invalid input. Phone number must be a 10 digit number formatted 1234567890.")
-            return
-        if fname is None or lname is None:
-            print("Invalid input. First and last name required.")
-            return
         if not Checks.is_pos_num(customerID, "int", "customerID"):
+            return
+        if phone is None:
+            phone = self.cursor.execute("SELECT phone FROM customer WHERE customerID=?",
+                                        (customerID,)).fetchone()[0]
+        if fname is None:
+            fname = self.cursor.execute("SELECT fname FROM customer WHERE customerID=?",
+                                        (customerID,)).fetchone()[0]
+        if lname is None:
+            lname = self.cursor.execute("SELECT lname FROM customer WHERE customerID=?",
+                                        (customerID,)).fetchone()[0]
+        if not Checks.is_phone(phone):
+            flash("Invalid input. Phone number must be a 10 digit number formatted 1234567890.")
             return
         self.cursor.execute("UPDATE CUSTOMER SET FNAME = ?, LNAME = ?, PHONE = ? WHERE CUSTOMERID = ?",(fname,lname,phone,customerID))
         self.conn.commit()
     #update function for employee table
     def upd_emp(self,employeeID, fname, lname, position, salary):
+        if fname is None:
+            fname = self.cursor.execute("SELECT fname FROM employee WHERE employeeID=?", (employeeID,)).fetchone()[0]
+        if lname is None:
+            lname = self.cursor.execute("SELECT lname FROM employee WHERE employeeID=?", (employeeID,)).fetchone()[0]
+        if position is None:
+            position = self.cursor.execute("SELECT position FROM employee WHERE employeeID=?", (employeeID,)).fetchone()[0]
+        if salary is None:
+            salary = self.cursor.execute("SELECT salary FROM employee WHERE employeeID=?", (employeeID,)).fetchone()[0]
         if not Checks.is_pos_num(salary, "float", "Salary"):
             return
         if fname is None or lname is None or salary is None:
@@ -94,32 +109,43 @@ class Database:
             return
         if not Checks.is_pos_num(employeeID, "int", "employeeID"):
             return
-        self.cursor.execute("UPDATE EMPLOYEE SET FNAME = ?, LNAME = ?, POSITION = ?,SALARY=? WHERE EMPLOYEEID = ?",(fname,lname,position,salary,employeeID))
+        self.cursor.execute("UPDATE EMPLOYEE SET FNAME = ?, LNAME = ?, POSITION = ?,SALARY=? WHERE EMPLOYEEID = ?",
+                            (fname,lname,position,salary,employeeID))
         self.conn.commit()
     #update function for product table
     def upd_prod(self,productID, p_desc, price, stock):
+        if p_desc is None:
+            p_desc = self.cursor.execute("SELECT p_desc FROM product WHERE productID=?", (productID,)).fetchone()[0]
+        if price is None:
+            price = self.cursor.execute("SELECT price FROM product WHERE productID=?", (productID,)).fetchone()[0]
+        if stock is None:
+            stock = self.cursor.execute("SELECT stock FROM product WHERE productID=?", (productID,)).fetchone()[0]
         if not Checks.is_pos_num(price, "float", "Price"):
             return
         if not Checks.is_pos_num(stock, "int", "Stock"):
             return
-        if p_desc is None:
-            print("Invalid input. Product description required.")
-            return
         if not Checks.is_pos_num(productID, "int", "productID"):
             return
-        self.cursor.execute("UPDATE PRODUCT SET P_DESC = ?, PRICE = ?, STOCK = ? WHERE PRODUCTID = ?",(p_desc, price, stock,productID))
+        self.cursor.execute("UPDATE PRODUCT SET P_DESC = ?, PRICE = ?, STOCK = ? WHERE PRODUCTID = ?",
+                                (p_desc, float(price), int(stock),int(productID)))
         self.conn.commit()
     #update function for orders table
-    def upd_ord(self,orderID, customerID, employeeID, total):
-        if not Checks.is_pos_num(total, "float", "Total"):
+    def upd_ord(self,orderID, customerID, employeeID):
+        if customerID is not None and not Checks.is_pos_num(customerID, "int", "customerID"):
             return
-        if not Checks.is_pos_num(customerID, "int", "customerID"):
-            return
-        if not Checks.is_pos_num(employeeID, "int", "employeeID"):
+        if employeeID is not None and not Checks.is_pos_num(employeeID, "int", "employeeID"):
             return
         if not Checks.is_pos_num(orderID, "int", "orderID"):
             return
-        self.cursor.execute("UPDATE ORDERS SET CUSTOMERID = ?, EMPLOYEEID = ?, TOTAL = ? WHERE ORDERID = ?",(customerID, employeeID, total,orderID))
+        if customerID is not None and employeeID is not None:
+            self.cursor.execute("UPDATE ORDERS SET CUSTOMERID = ?, EMPLOYEEID = ? WHERE ORDERID = ?",
+                                (int(customerID), int(employeeID), int(orderID)))
+        elif employeeID is None:
+            self.cursor.execute("UPDATE ORDERS SET CUSTOMERID = ? WHERE ORDERID = ?",
+                                (int(customerID), int(orderID)))
+        elif customerID is None:
+            self.cursor.execute("UPDATE ORDERS SET EMPLOYEEID = ? WHERE ORDERID = ?",
+                                (int(employeeID), int(orderID)))
         self.conn.commit()
     def upd_pur(self,orderID,productID,quantity):
         if not Checks.is_pos_num(orderID, "int", "orderID"):
@@ -128,7 +154,28 @@ class Database:
             return
         if not Checks.is_pos_num(quantity, "int", "quantity"):
             return
-        self.cursor.execute("UPDATE Purchase SET quantity = ? WHERE orderID = ? and PRODUCTID = ?",(quantity, orderID, productID))
+        with self.conn:
+            self.cursor.execute("BEGIN")
+            try:
+                quan_diff = int(quantity) - self.cursor.execute("SELECT quantity FROM purchase WHERE orderID=? and productID = ?",
+                                               (orderID, productID)).fetchone()[0]
+                stock = self.cursor.execute("""SELECT stock FROM product WHERE productID = ?""",
+                                                   (productID,)).fetchone()[0]
+                if quan_diff > stock:
+                    flash("Not enough stock for the increase in quantity.")
+                    return
+                elif quan_diff > 0:
+                    self.cursor.execute("UPDATE product SET stock=? WHERE productID=?", (stock-quan_diff,productID))
+                price = self.cursor.execute("SELECT price FROM product WHERE productID = ?",
+                                               (productID,)).fetchone()[0]
+                total= self.cursor.execute("SELECT total FROM orders WHERE orderID=?", (orderID,)).fetchone()[0]
+                self.cursor.execute("UPDATE orders SET total = ? WHERE orderID=?", (total+price*quan_diff, orderID))
+                self.cursor.execute("UPDATE Purchase SET quantity = ? WHERE orderID = ? and PRODUCTID = ?",
+                                    (int(quantity), int(orderID), int(productID)))
+                self.conn.commit()
+            except sqlite3.Error:
+                print("transaction failed")
+                self.cursor.execute("ROLLBACK")
         self.conn.commit()
     #delete function for customer table
     def del_cus(self,customerID):
@@ -160,17 +207,29 @@ class Database:
             return
         if not Checks.is_pos_num(productID, "int", "productID"):
             return
-        self.cursor.execute("DELETE FROM purchase WHERE orderID=? and PRODUCTID = ?",(orderID,productID))
-        self.conn.commit()
+        with self.conn:
+            self.cursor.execute("BEGIN")
+            try:
+                quantity = self.cursor.execute("SELECT quantity FROM purchase WHERE orderID=? and productID = ?",
+                                               (orderID, productID)).fetchone()[0]
+                price = self.cursor.execute("SELECT price FROM product WHERE productID = ?",
+                                               (productID,)).fetchone()[0]
+                total= self.cursor.execute("SELECT total FROM orders WHERE orderID=?", (orderID,)).fetchone()[0]
+                self.cursor.execute("UPDATE orders SET total = ? WHERE orderID=?", (total-price*quantity, orderID))
+                self.cursor.execute("DELETE FROM purchase WHERE orderID=? and PRODUCTID = ?", (orderID, productID))
+                self.conn.commit()
+            except sqlite3.Error:
+                print("transaction failed")
+                self.cursor.execute("ROLLBACK")
     #sorted select functions
     def sort_table(self,table,order,asc):
         return self.conn.execute("SELECT * FROM "+table+" ORDER BY "+order+" "+asc).fetchall()
     #Filters results
     def filter_table(self,table,target,value,op):
-        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value).fetchall()
+        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" \""+value+"\"").fetchall()
     #sorts and filters
     def sort_filter(self,table,order,asc,target,value,op):
-        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" "+value+" ORDER BY "+order+" "+asc).fetchall()
+        return self.conn.execute("SELECT * FROM "+table+" WHERE "+target+" "+op+" \""+value+"\" ORDER BY "+order+" "+asc).fetchall()
     #handles transactions for placing orders
     def ord_transaction(self, phone, employeeID, list):
         with self.conn:

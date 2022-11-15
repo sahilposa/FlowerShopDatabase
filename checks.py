@@ -116,7 +116,7 @@ class Checks:
         return False
     @staticmethod
     def is_productID_exist(productID,cursor):
-        cursor.execute("SELECT * FROM product WHERE productID=?", (productID,))
+        cursor.execute("SELECT * FROM product WHERE productID=?", (int(productID),))
         if cursor.fetchone() is None:
             return True
         return False
