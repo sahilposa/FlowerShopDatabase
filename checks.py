@@ -132,3 +132,27 @@ class Checks:
         if cursor.fetchone() is None:
             return True
         return False
+
+
+    @staticmethod
+    def none_update(var_list, name_list, table, ID, cursor):
+        for x in range(len(var_list)):
+            if var_list[x] is None:
+                var_list[x] = cursor.execute("SELECT "+name_list[x+1]+" FROM "+table+" WHERE "+name_list[0]+"=?",
+                                             (ID,)).fetchone()[0]
+
+
+    @staticmethod
+    def is_pos_int(test_list):
+        for x in test_list:
+            if not Checks.is_pos_num(x, "int", "Variable"):
+                return False
+        return True
+
+
+    @staticmethod
+    def is_pos_float(test_list):
+        for x in test_list:
+            if not Checks.is_pos_num(x, "float", "Variable"):
+                return False
+        return True
